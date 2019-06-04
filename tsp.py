@@ -92,7 +92,7 @@ class TSP:
             weights.append(-1)
         creator.create("Fitness", base.Fitness, weights=weights)
 
-        creator.create("Individual", set, fitness=creator.Fitness)
+        creator.create("Individual", list, fitness=creator.Fitness)
 
         toolbox = base.Toolbox()
 
