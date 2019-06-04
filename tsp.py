@@ -43,17 +43,17 @@ for i in range(NBR_ITEMS):
 
 
 def evalTSP(individual):
-    fitness = np.zeros(dimensions)
+    fitness = np.zeros(self.M)
     for i in np.argsort(individual):
-        fitness[:] += distance[:,i,i+1]
+        fitness[:] += self.Data[:,i,i+1]
     return fitness
 
 
 def uniformCrossover(ind1, ind2):
     """Apply a uniform crossover operation on input sets."""
-    c1 = np.zeros(len(ind1))
-    c2 = np.zeros(len(ind1))
-    for i in range(len(ind1)):
+    c1 = np.zeros(self.N)
+    c2 = np.zeros(self.N)
+    for i in range(self.N):
         if random.random() < 0.5:
             c1[i] = ind1[i]
             c2[i] = ind2[i]
@@ -61,7 +61,8 @@ def uniformCrossover(ind1, ind2):
             c1[i] = ind2[i]
             c2[i] = ind1[i]
     return c1, c2
-    
+
+
 def mutSet(individual):
     """Mutation that pops or add an element."""
     if random.random() < 0.5:
