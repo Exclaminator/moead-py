@@ -17,7 +17,7 @@ Author: Manuel Belmadani <mbelm006@uottawa.ca>
 Date  : 2016-09-05
 
 """
-from exceptions import NotImplementedError
+from builtins import NotImplementedError
 from deap import tools
 
 import random
@@ -76,7 +76,7 @@ class MOEAD(object):
             self.toolbox.mate
             self.toolbox.mutate
         except Exception as e:
-            print "Error in MOEAD.__init__: toolbox.mutate or toolbox.mate is not assigned."
+            print("Error in MOEAD.__init__: toolbox.mutate or toolbox.mate is not assigned.")
             raise e                     
 
         ### Additional stuff not from JMetal implementation
@@ -89,7 +89,7 @@ class MOEAD(object):
         
         self.maxEvaluations = -1
         if maxEvaluations == ngen == 0:
-            print "maxEvaluations or ngen must be greater than 0."
+            print("maxEvaluations or ngen must be greater than 0.")
             raise ValueError
         if ngen > 0:
             self.maxEvaluations =  ngen * self.populationSize_
@@ -106,13 +106,13 @@ class MOEAD(object):
         self.delta_ = delta
         
     def execute(self):
-        print "Executing MOEA/D"
+        print("Executing MOEA/D")
 
         logbook = tools.Logbook()
         logbook.header = ['gen', 'evals'] + (self.stats.fields if self.stats else [])
         
         self.evaluations_ = 0
-        print "POPSIZE:", self.populationSize_
+        print("POPSIZE:", self.populationSize_)
     
         self.indArray_ = [ self.toolbox.individual() for _ in range(self.n_objectives) ]
 
@@ -133,13 +133,13 @@ class MOEAD(object):
         record = self.stats.compile(self.population) if self.stats is not None else {}
         
         logbook.record(gen=self.ngen , evals=self.evaluations_, **record)
-        if self.verbose: print logbook.stream
+        if self.verbose: print(logbook.stream)
         
         while self.evaluations_ < self.maxEvaluations:
             permutation = [None] * self.populationSize_ # Of type int
             self.randomPermutations(permutation, self.populationSize_)
 
-            for i in xrange(self.populationSize_):
+            for i in range(self.populationSize_):
                 n = permutation[i]
                 type_ = int()
                 rnd = random.random()
@@ -191,7 +191,7 @@ class MOEAD(object):
 
                 logbook.record(gen=self.ngen, evals=self.evaluations_, **record )
 
-                if self.verbose: print logbook.stream
+                if self.verbose: print(logbook.stream)
 
                 
         return self.population
@@ -206,7 +206,7 @@ class MOEAD(object):
         
         """
         if self.n_objectives == 2: 
-            for n in xrange(self.populationSize_):
+            for n in range(self.populationSize_):
                 a = 1.0 * float(n) / (self.populationSize_ - 1)
                 self.lambda_[n][0] = a
                 self.lambda_[n][1] = 1 - a
@@ -218,8 +218,8 @@ class MOEAD(object):
             m = self.populationSize_
 
             self.lambda_ = list()
-            for i in xrange(m):
-                for j in xrange(m):
+            for i in range(m):
+                for j in range(m):
                     if i+j <= m:
                         k = m - i - j
                         try:
@@ -229,11 +229,11 @@ class MOEAD(object):
                             weight_scalars[2] = float(k) / (m)
                             self.lambda_.append(weight_scalars)
                         except Exception as e:
-                            print "Error creating weight with 3 objectives at:"
-                            print "count", count
-                            print "i", i
-                            print "j", j
-                            print "k", k
+                            print("Error creating weight with 3 objectives at:")
+                            print("count", count)
+                            print("i", i)
+                            print("j", j)
+                            print("k", k)
                             raise e
             # Trim number of weights to fit population size
             self.lambda_ = sorted((x for x in self.lambda_), key=lambda x: sum(x), reverse=True)
@@ -255,18 +255,18 @@ class MOEAD(object):
                                 self.lambda_[i][j] = float(value)
                                 j += 1
                         except Exception as e:
-                            print "Error loading floats as weight vectors"
-                            print "tokens", tokens
-                            print "value:",  value
-                            print "lambda_", len(self.lambda_),"*",len(self.lambda_[0])
-                            print i, j, aux_
-                            print e
+                            print("Error loading floats as weight vectors")
+                            print("tokens", tokens)
+                            print("value:",  value)
+                            print("lambda_", len(self.lambda_),"*",len(self.lambda_[0]))
+                            print(i, j, aux_)
+                            print(e)
                             raise e
                         i += 1
                 f.close()
             except Exception as e:
-                print "initUniformWeight: failed when reading for file:", file_
-                print e
+                print("initUniformWeight: failed when reading for file:", file_)
+                print(e)
                 raise e
 
     """ 
@@ -276,8 +276,8 @@ class MOEAD(object):
         x = [None] * self.populationSize_ # Of type float
         idx = [None] * self.populationSize_ #Of type int
 
-        for i in xrange(self.populationSize_):
-            for j in xrange(self.populationSize_):
+        for i in range(self.populationSize_):
+            for j in range(self.populationSize_):
                 x[j] = self.distVector(self.lambda_[i], self.lambda_[j])
                 idx[j] = j
 
@@ -290,7 +290,7 @@ class MOEAD(object):
     " Not implemented: population should be passed as argument
     """
     def initPopulation(self):
-        for i in xrange(self._populationSize):
+        for i in range(self._populationSize):
             if True:
                 continue
             # generated solutions
@@ -309,7 +309,7 @@ class MOEAD(object):
             self.z_[i] = 1e30 * self.indArray_[i].fitness.weights[i] # mbelmadani: For minimization objectives
             self.evaluations_+=1
     
-        for i in xrange(self.populationSize_): #?
+        for i in range(self.populationSize_): #?
             self.updateReference(self.population[i])
 
     """
@@ -337,7 +337,7 @@ class MOEAD(object):
             else:
                 p = random.randint(0, self.populationSize_ - 1)
             flag = True
-            for i in xrange(len(vector)): 
+            for i in range(len(vector)): 
                 if vector[i] == p: # p is in the list
                     flag = False
                     break
@@ -349,7 +349,7 @@ class MOEAD(object):
     " @param individual
     """
     def updateReference(self, individual):
-        for n in xrange(self.n_objectives):
+        for n in range(self.n_objectives):
             if individual.fitness.values[n] < self.z_[n]:
                 self.z_[n] = individual.fitness.values[n] * individual.fitness.weights[n] 
                 self.indArray_[n] = individual
@@ -379,7 +379,7 @@ class MOEAD(object):
 
         self.randomPermutations(perm, size)
 
-        for i in xrange(size):
+        for i in range(size):
             k = int()
             if type_ == 1:
                 k = self.neighbourhood_[id_][perm[i]]
@@ -409,7 +409,7 @@ class MOEAD(object):
 
         if self.functionType_ == "_TCHE1":
             maxFun = -1.0e+30 
-            for n in xrange(self.n_objectives):                
+            for n in range(self.n_objectives):                
                 diff = abs(individual.fitness.values[n] - self.z_[n]) # JMetal default
                 feval = float()
                 if lambda_[n] == 0:
@@ -422,7 +422,7 @@ class MOEAD(object):
 
             fitness = maxFun 
         else:
-            print "MOEAD.fitnessFunction: unknown type", self.functionType_
+            print("MOEAD.fitnessFunction: unknown type", self.functionType_)
             raise NotImplementedError
         
         return fitness
@@ -433,7 +433,7 @@ class MOEAD(object):
     def distVector(self, vector1, vector2 ):
         dim = len(vector1)
         sum_ = 0
-        for n in xrange(dim):
+        for n in range(dim):
             sum_ += ((vector1[n] - vector2[n] ) * (vector1[n] - vector2[n]))
         return math.sqrt(sum_)
 
@@ -444,8 +444,8 @@ class MOEAD(object):
         n   : integer
         m   : integer        
         """
-        for i in xrange(m):
-            for j in xrange(i+1, n):
+        for i in range(m):
+            for j in range(i+1, n):
                 if x[i] > x[j]:
                     temp = x[i]
                     x[i] = x[j]
