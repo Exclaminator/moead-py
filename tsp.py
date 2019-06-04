@@ -36,105 +36,111 @@ LAMBDA = 2
 CXPB = 0.7
 MUTPB = 0.2
 
-# Create random items and store them in the items' dictionary.
-items = {}
-for i in range(NBR_ITEMS):
-    items[i] = (random.randint(1, 10), random.uniform(0, 100))
 
+class TSP:
+    def __init__(self, instance):
+        f = open(instance, "r")
+        # load number of instances and objectives
+        self.N, self.M = f.readline().split(" ")
+        self.Data = np.zeros([self.M, self.N, self.N])
+        for o in range(self.M):
+            for i in range(self.N):
+                for j in range(i):
+                    self.Data[o, i, j] = f.readline()
+                    self.Data[o, j, i] = self.Data[o, i, j]
 
-def evalTSP(individual):
-    fitness = np.zeros(self.M)
-    for i in np.argsort(individual):
-        fitness[:] += self.Data[:,i,i+1]
-    return fitness
+    def evalTSP(individual):
+        fitness = np.zeros(dimensions)
+        for i in np.argsort(individual):
+            fitness[:] += distance[:, i, i + 1]
+        return fitness
 
+    def uniformCrossover(ind1, ind2):
+        """Apply a uniform crossover operation on input sets."""
+        c1 = np.zeros(self.N)
+        c2 = np.zeros(self.N)
+        for i in range(self.N):
+            if random.random() < 0.5:
+                c1[i] = ind1[i]
+                c2[i] = ind2[i]
+            else:
+                c1[i] = ind2[i]
+                c2[i] = ind1[i]
+        return c1, c2
 
-def uniformCrossover(ind1, ind2):
-    """Apply a uniform crossover operation on input sets."""
-    c1 = np.zeros(self.N)
-    c2 = np.zeros(self.N)
-    for i in range(self.N):
+    def mutSet(self, individual):
+        """Mutation that pops or add an element."""
         if random.random() < 0.5:
-            c1[i] = ind1[i]
-            c2[i] = ind2[i]
+            if len(individual) > 0:     # We cannot pop from an empty set
+                individual.remove(random.choice(sorted(tuple(individual))))
         else:
-            c1[i] = ind2[i]
-            c2[i] = ind1[i]
-    return c1, c2
+            individual.add(random.randrange(NBR_ITEMS))
+        return individual,
+
+    def main(self, objectives=2, seed=64):
+        random.seed(seed)
+
+        # Create the item dictionary: item name is an integer, and value is
+        # a (weight, value) 2-uple.
+        if objectives == 2:
+            creator.create("Fitness", base.Fitness, weights=(-1.0, 1.0))
+        elif objectives == 3:
+            creator.create("Fitness", base.Fitness, weights=(-1.0, 1.0, -1.0))
+        else:
+            print("No evaluation function available for", objectives, "objectives.")
+            sys.exit(-1)
 
 
-def mutSet(individual):
-    """Mutation that pops or add an element."""
-    if random.random() < 0.5:
-        if len(individual) > 0:     # We cannot pop from an empty set
-            individual.remove(random.choice(sorted(tuple(individual))))
-    else:
-        individual.add(random.randrange(NBR_ITEMS))
-    return individual,
+        creator.create("Individual", set, fitness=creator.Fitness)
 
-def main(objectives=2, seed=64):
-    random.seed(seed)
+        toolbox = base.Toolbox()
 
-    # Create the item dictionary: item name is an integer, and value is 
-    # a (weight, value) 2-uple.
-    if objectives == 2:
-        creator.create("Fitness", base.Fitness, weights=(-1.0, 1.0))
-    elif objectives == 3:
-        creator.create("Fitness", base.Fitness, weights=(-1.0, 1.0, -1.0))
-    else:
-        print("No evaluation function available for", objectives, "objectives.")
-        sys.exit(-1)
+        # Attribute generator
+        toolbox.register("attr_item", random.randrange, NBR_ITEMS)
 
-        
-    creator.create("Individual", set, fitness=creator.Fitness)
+        # Structure initializers
+        toolbox.register("individual", tools.initRepeat, creator.Individual,
+                         toolbox.attr_item, IND_INIT_SIZE)
+        toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-    toolbox = base.Toolbox()
+        if objectives == 2:
+            toolbox.register("evaluate", evalKnapsack)
+        elif objectives == 3:
+            toolbox.register("evaluate", evalKnapsackBalanced)
+        else:
+            print("No evaluation function available for", objectives, "objectives.")
+            sys.exit(-1)
 
-    # Attribute generator
-    toolbox.register("attr_item", random.randrange, NBR_ITEMS)
 
-    # Structure initializers
-    toolbox.register("individual", tools.initRepeat, creator.Individual, 
-                     toolbox.attr_item, IND_INIT_SIZE)
-    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+        toolbox.register("mate", cxSet)
+        toolbox.register("mutate", mutSet)
+        toolbox.register("select", tools.selNSGA2)
 
-    if objectives == 2:
-        toolbox.register("evaluate", evalKnapsack)
-    elif objectives == 3:
-        toolbox.register("evaluate", evalKnapsackBalanced)
-    else:
-        print("No evaluation function available for", objectives, "objectives.")
-        sys.exit(-1)
-        
+        pop = toolbox.population(n=MU)
+        hof = tools.ParetoFront()
 
-    toolbox.register("mate", cxSet)
-    toolbox.register("mutate", mutSet)
-    toolbox.register("select", tools.selNSGA2)
+        stats = {}
+        def lambda_factory(idx):
+            return lambda ind: ind.fitness.values[idx]
 
-    pop = toolbox.population(n=MU)
-    hof = tools.ParetoFront()
+        fitness_tags = ["Weight", "Value"]
+        for tag in fitness_tags:
+            s = tools.Statistics( key=lambda_factory(
+                        fitness_tags.index(tag)
+                    ))
+            stats[tag] = s
 
-    stats = {}
-    def lambda_factory(idx):
-        return lambda ind: ind.fitness.values[idx]                
+        mstats = tools.MultiStatistics(**stats)
+        mstats.register("avg", numpy.mean, axis=0)
+        mstats.register("std", numpy.std, axis=0)
+        mstats.register("min", numpy.min, axis=0)
+        mstats.register("max", numpy.max, axis=0)
 
-    fitness_tags = ["Weight", "Value"]
-    for tag in fitness_tags:
-        s = tools.Statistics( key=lambda_factory(
-                    fitness_tags.index(tag)
-                ))
-        stats[tag] = s
+        ea = MOEAD(pop, toolbox, MU, CXPB, MUTPB, ngen=NGEN, stats=mstats, halloffame=hof, nr=LAMBDA)
+        pop = ea.execute()
 
-    mstats = tools.MultiStatistics(**stats)
-    mstats.register("avg", numpy.mean, axis=0)
-    mstats.register("std", numpy.std, axis=0)
-    mstats.register("min", numpy.min, axis=0)
-    mstats.register("max", numpy.max, axis=0)
+        return pop, stats, hof
 
-    ea = MOEAD(pop, toolbox, MU, CXPB, MUTPB, ngen=NGEN, stats=mstats, halloffame=hof, nr=LAMBDA)
-    pop = ea.execute()
-    
-    return pop, stats, hof
                  
 if __name__ == "__main__":
     objectives = 2
