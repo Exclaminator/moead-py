@@ -49,13 +49,14 @@ class TSP:
                     self.Data[o, i, j] = f.readline()
                     self.Data[o, j, i] = self.Data[o, i, j]
 
-    def evalTSP(individual):
+    def evalTSP(self, individual):
         fitness = np.zeros(dimensions)
-        for i in np.argsort(individual):
-            fitness[:] += distance[:, i, i + 1]
+        order = np.argsort(individual)
+        for i in range(self.N):
+            fitness[:] += self.Data[:, order[i], order[math.mod(i + 1, self.N)]]
         return fitness
 
-    def uniformCrossover(ind1, ind2):
+    def uniformCrossover(self, ind1, ind2):
         """Apply a uniform crossover operation on input sets."""
         c1 = np.zeros(self.N)
         c2 = np.zeros(self.N)
