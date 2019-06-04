@@ -43,14 +43,11 @@ for i in range(NBR_ITEMS):
 
 
 def evalTSP(individual):
-    cost = np.zeros(dimensions)
-    for item in individual:
-        for d in dimensions:
-            for item in np.argsort(individual):
-                
-    if len(individual) > MAX_ITEM or weight > MAX_WEIGHT:
-        return 1e30, 0.0 # Ensure overweighted bags are dominated
-    return weight, value
+    fitness = np.zeros(dimensions)
+    for i in np.argsort(individual):
+        fitness[:] += distance[:,i,i+1]
+    return fitness
+
 
 def evalKnapsackBalanced(individual):
     """
