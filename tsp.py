@@ -150,7 +150,8 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         objectives = int(sys.argv[2])
 
-    pop,stats,hof = main(objectives)
+    TSP = TSP("instance_10_3")
+    pop,stats,hof = TSP.main(objectives)
 
     pop = [str(p) +" "+ str(p.fitness.values) for p in pop]
     hof = [str(h) +" "+ str(h.fitness.values) for h in hof]
