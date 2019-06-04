@@ -16,6 +16,7 @@
 import random
 import numpy
 import sys
+import math
 
 from moead import MOEAD
 
@@ -42,6 +43,8 @@ class TSP:
         f = open(instance, "r")
         # load number of instances and objectives
         self.N, self.M = f.readline().split(" ")
+        self.N = int(self.N)
+        self.M = int(self.M)
         self.Data = np.zeros([self.M, self.N, self.N])
         for o in range(self.M):
             for i in range(self.N):
@@ -50,10 +53,10 @@ class TSP:
                     self.Data[o, j, i] = self.Data[o, i, j]
 
     def evalTSP(self, individual):
-        fitness = np.zeros(dimensions)
+        fitness = np.zeros(self.M)
         order = np.argsort(individual)
         for i in range(self.N):
-            fitness[:] += self.Data[:, order[i], order[math.mod(i + 1, self.N)]]
+            fitness[:] += self.Data[:, order[i], order[math.fmod(i + 1, self.N)]]
         return fitness
 
     def uniformCrossover(self, ind1, ind2):
@@ -78,19 +81,16 @@ class TSP:
             individual.add(random.randrange(NBR_ITEMS))
         return individual,
 
-    def main(self, objectives=2, seed=64):
+    def main(self, seed=64):
         random.seed(seed)
 
         # Create the item dictionary: item name is an integer, and value is
         # a (weight, value) 2-uple.
-        if objectives == 2:
-            creator.create("Fitness", base.Fitness, weights=(-1.0, 1.0))
-        elif objectives == 3:
-            creator.create("Fitness", base.Fitness, weights=(-1.0, 1.0, -1.0))
-        else:
-            print("No evaluation function available for", objectives, "objectives.")
-            sys.exit(-1)
 
+        weights = []
+        for i in range(self.M):
+            weights.append(-1)
+        creator.create("Fitness", base.Fitness, weights=weights)
 
         creator.create("Individual", set, fitness=creator.Fitness)
 
@@ -104,17 +104,11 @@ class TSP:
                          toolbox.attr_item, IND_INIT_SIZE)
         toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-        if objectives == 2:
-            toolbox.register("evaluate", evalKnapsack)
-        elif objectives == 3:
-            toolbox.register("evaluate", evalKnapsackBalanced)
-        else:
-            print("No evaluation function available for", objectives, "objectives.")
-            sys.exit(-1)
+        toolbox.register("evaluate", self.evalTSP)
 
 
-        toolbox.register("mate", cxSet)
-        toolbox.register("mutate", mutSet)
+        toolbox.register("mate", self.uniformCrossover)
+        toolbox.register("mutate", self.mutSet)
         toolbox.register("select", tools.selNSGA2)
 
         pop = toolbox.population(n=MU)
@@ -152,7 +146,7 @@ if __name__ == "__main__":
         objectives = int(sys.argv[2])
 
     TSP = TSP("instance_10_3")
-    pop,stats,hof = TSP.main(objectives)
+    pop,stats,hof = TSP.main()
 
     pop = [str(p) +" "+ str(p.fitness.values) for p in pop]
     hof = [str(h) +" "+ str(h.fitness.values) for h in hof]
