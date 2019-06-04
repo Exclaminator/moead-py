@@ -49,27 +49,18 @@ def evalTSP(individual):
     return fitness
 
 
-def evalKnapsackBalanced(individual):
-    """
-    Variant of the original weight-value knapsack problem with added third object being minimizing weight difference between items.
-    """
-    weight, value = evalKnapsack(individual)
-    balance = 0.0
-    for a,b in zip(individual, list(individual)[1:]):
-        balance += abs(items[a][0]-items[b][0])
-    if len(individual) > MAX_ITEM or weight > MAX_WEIGHT:
-        return weight, value, 1e30 # Ensure overweighted bags are dominated
-    return weight, value, balance
-
-def cxSet(ind1, ind2):
-    """Apply a crossover operation on input sets. The first child is the
-    intersection of the two sets, the second child is the difference of the
-    two sets.
-    """
-    temp = set(ind1)                # Used in order to keep type
-    ind1 &= ind2                    # Intersection (inplace)
-    ind2 ^= temp                    # Symmetric Difference (inplace)
-    return ind1, ind2
+def uniformCrossover(ind1, ind2):
+    """Apply a uniform crossover operation on input sets."""
+    c1 = np.zeros(len(ind1))
+    c2 = np.zeros(len(ind1))
+    for i in range(len(ind1)):
+        if random.random() < 0.5:
+            c1[i] = ind1[i]
+            c2[i] = ind2[i]
+        else:
+            c1[i] = ind2[i]
+            c2[i] = ind1[i]
+    return c1, c2
     
 def mutSet(individual):
     """Mutation that pops or add an element."""
