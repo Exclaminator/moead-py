@@ -123,7 +123,9 @@ class TSP:
         def lambda_factory(idx):
             return lambda ind: ind.fitness.values[idx]
 
-        fitness_tags = ["Weight", "Value"]
+        fitness_tags = []
+        for i in range(self.M):
+            fitness_tags.append(str(i))
         for tag in fitness_tags:
             s = tools.Statistics( key=lambda_factory(
                         fitness_tags.index(tag)
