@@ -16,7 +16,7 @@
 import random
 import numpy
 import sys
-import math
+import copy
 
 from moead import MOEAD
 
@@ -57,8 +57,8 @@ class TSP:
         order = np.argsort(individual)
         order2 = np.argsort(order)
 
-        print(individual)
-        print(order)
+        #print(individual)
+        #print(order)
         for o in range (self.M):
             for i in range(self.N):
                 fitness[o] += self.Data[o, order[i], order[(i + 1) % self.N]]
@@ -66,8 +66,8 @@ class TSP:
 
     def uniformCrossover(self, ind1, ind2):
         """Apply a uniform crossover operation on input sets."""
-        c1 = np.zeros(self.N)
-        c2 = np.zeros(self.N)
+        c1 = copy.deepcopy(ind1)
+        c2 = copy.deepcopy(ind2)
         for i in range(self.N):
             if random.random() < 0.5:
                 c1[i] = ind1[i]
