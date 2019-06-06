@@ -24,6 +24,7 @@ from deap import base
 from deap import creator
 from deap import tools
 import numpy as np
+import math as ma
 
 IND_INIT_SIZE = 5
 MAX_ITEM = 50
@@ -77,6 +78,18 @@ class TSP:
                 c2[i] = ind1[i]
         return c1, c2
 
+    def uniformRVCrossover(self, ind1, ind2):
+        """Apply a uniform crossover operation on input sets."""
+        c1 = copy.deepcopy(ind1)
+        c2 = copy.deepcopy(ind2)
+        for i in range(self.N):
+            maxv = 9.5 - max(ind1[i],ind2[i]) / 2
+            minv = min(ind1[i],ind2[i]) / 2
+            r = random.random()
+            c1[i] = minv + (maxv-minv)*r
+            c2[i] = maxv - (maxv-minv)*r
+        return c1, c2
+
     def mutSet(self, individual):
         # """Mutation that pops or add an element."""
         # if random.random() < 0.5:
@@ -112,7 +125,7 @@ class TSP:
         toolbox.register("evaluate", self.evalTSP)
 
 
-        toolbox.register("mate", self.uniformCrossover)
+        toolbox.register("mate", self.uniformRVCrossover)
         toolbox.register("mutate", self.mutSet)
         toolbox.register("select", tools.selNSGA2)
 
@@ -152,7 +165,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         objectives = int(sys.argv[2])
 
-    TSP = TSP("instance_10_3")
+    TSP = TSP("instance_5_3")
     pop,stats,hof = TSP.main()
 
     pop = [str(p) +" "+ str(p.fitness.values) for p in pop]
