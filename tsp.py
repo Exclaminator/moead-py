@@ -168,8 +168,8 @@ if __name__ == "__main__":
     TSP = TSP("instance_5_3")
     pop, stats, hof = TSP.main()
 
-    pop = [str(p) +" "+ str(p.fitness.values) for p in pop]
-    hof = [str(h) +" "+ str(h.fitness.values) for h in hof]
+    pop = [str(p) + " " + str(p.fitness.values) for p in pop]
+    hof = [str(h) + " " + str(h.fitness.values) for h in hof]
     print("POP:")
     print("\n".join(pop))
 
