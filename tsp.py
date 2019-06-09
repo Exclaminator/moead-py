@@ -55,13 +55,10 @@ class TSP:
     def evalTSP(self, individual):
         fitness = np.zeros(self.M)
         order = np.argsort(individual)
-        order2 = np.argsort(order)
-
-        print(individual)
-        print(order)
+        print
         for o in range (self.M):
             for i in range(self.N):
-                fitness[o] += self.Data[o, order[i], order[(i + 1) % self.N]]
+                fitness[o] += self.Data[o, order[i], order[math.fmod(i + 1, self.N)]]
         return tuple(fitness)
 
     def uniformCrossover(self, ind1, ind2):
@@ -78,12 +75,12 @@ class TSP:
         return c1, c2
 
     def mutSet(self, individual):
-        # """Mutation that pops or add an element."""
-        # if random.random() < 0.5:
-        #     if len(individual) > 0:     # We cannot pop from an empty set
-        #         individual.remove(random.choice(sorted(tuple(individual))))
-        # else:
-        #     individual.add(random.randrange(NBR_ITEMS))
+        """Mutation that pops or add an element."""
+        if random.random() < 0.5:
+            if len(individual) > 0:     # We cannot pop from an empty set
+                individual.remove(random.choice(sorted(tuple(individual))))
+        else:
+            individual.add(random.randrange(NBR_ITEMS))
         return individual,
 
     def main(self, seed=64):
@@ -106,7 +103,7 @@ class TSP:
 
         # Structure initializers
         toolbox.register("individual", tools.initRepeat, creator.Individual,
-                         toolbox.attr_item, self.N)
+                         toolbox.attr_item, IND_INIT_SIZE)
         toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
         toolbox.register("evaluate", self.evalTSP)
