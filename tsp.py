@@ -64,7 +64,15 @@ class TSP:
         return tuple(fitness)
 
     def gausianCrossover(self, ind1, ind2):
-        
+        """Use gausean crossover"""
+        c1 = copy.deepcopy(ind1)
+        c2 = copy.deepcopy(ind2)
+
+        for i in range(self.N):
+            c1[i] = numpy.random.normal((ind1[i] + ind2[i])/2, abs(ind1[i] - ind2[i])/2)
+            c2[i] = numpy.random.normal((ind1[i] + ind2[i])/2, abs(ind1[i] - ind2[i])/2)
+        return c1, c2
+
 
     def uniformCrossover(self, ind1, ind2):
         """Apply a uniform crossover operation on input sets."""
@@ -116,11 +124,8 @@ class TSP:
         toolbox.register("individual", tools.initRepeat, creator.Individual,
                          toolbox.attr_item, IND_INIT_SIZE)
         toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-
         toolbox.register("evaluate", self.evalTSP)
-
-
-        toolbox.register("mate", self.uniformRVCrossover)
+        toolbox.register("mate", self.gausianCrossover)
         toolbox.register("mutate", self.mutSet)
         toolbox.register("select", tools.selNSGA2)
 
