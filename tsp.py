@@ -24,7 +24,6 @@ from deap import base
 from deap import creator
 from deap import tools
 import numpy as np
-import math as ma
 
 IND_INIT_SIZE = 5
 MAX_ITEM = 50
@@ -122,7 +121,7 @@ class TSP:
 
         # Structure initializers
         toolbox.register("individual", tools.initRepeat, creator.Individual,
-                         toolbox.attr_item, IND_INIT_SIZE)
+                         toolbox.attr_item, self.N)
         toolbox.register("population", tools.initRepeat, list, toolbox.individual)
         toolbox.register("evaluate", self.evalTSP)
         toolbox.register("mate", self.gausianCrossover)
@@ -158,18 +157,14 @@ class TSP:
 
                  
 if __name__ == "__main__":
-    objectives = 2
-    seed = 64
     if len(sys.argv) > 1:
-        seed = int(sys.argv[1])
-    if len(sys.argv) > 2:
-        objectives = int(sys.argv[2])
+        folder = int(sys.argv[1])
 
-    TSP = TSP("instance_5_3")
+    TSP = TSP("instance_100_3")
     pop, stats, hof = TSP.main()
 
-    pop = [str(p) + " " + str(p.fitness.values) for p in pop]
-    hof = [str(h) + " " + str(h.fitness.values) for h in hof]
+    pop = [str(np.argsort(p)) + " " + str(p.fitness.values) for p in pop]
+    hof = [str(np.argsort(h)) + " " + str(h.fitness.values) for h in hof]
     print("POP:")
     print("\n".join(pop))
 
